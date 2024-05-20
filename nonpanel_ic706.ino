@@ -11,6 +11,7 @@ String FreqData;
 String freq1;
 String freq2;
 String freq3;
+String freq4;
 char menu[11];
 String menudata;
 char mch[2];
@@ -42,6 +43,8 @@ uint8_t tx_buf[BUFFER_SIZE];
 uint16_t tx_len=0;
 uint8_t rx_buf[BUFFER_SIZE];
 uint16_t rx_len=0;
+uint8_t hmi_buf[8];
+uint16_t hmi_len=0;
 
 
 void setup();
@@ -149,12 +152,7 @@ void loop() {
     rx_len = 0;
     }
   
-
-    if (Serial2.available()) { 
-    char receivedChar = Serial2.read(); 
-    Serial1.write(receivedChar); 
     
-    }
  
 }
 
@@ -167,9 +165,15 @@ void rigscreen(){
       freq1 = FreqData.substring(0,3);
       freq2 = FreqData.substring(3,6);
       freq3 = FreqData.substring(6,8);
+      freq4 = FreqData.substring(8,9);
       String freq = freq1 + dot + freq2 + dot + freq3;
       String sub(menu);
       menudata = menu;
+      menu1 = menudata.substring(0,2);
+      menu2 = menudata.substring(2,5);
+      menu3 = menudata.substring(5,8);
+      menu4 = menudata.substring(8,11);
+      
       String mchstr(mch);
       mchdata = mch;
       String rigdata;
@@ -177,10 +181,200 @@ void rigscreen(){
       rigdata = index + freq + vfoab + modeset + menu + mchdata + ts + meter + smeter;
       
        if (rigdata != prevRigdata) {
-        Serial.println(rigdata);
+        //Serial.println(rigdata);
         //Serial2.println(rigdata);
         prevRigdata = rigdata; 
         }
+       
+       Serial2.printf("t0.txt=\"%s\"",freq);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff); 
+       }
+       Serial2.printf("t11.txt=\"%s\"",freq4);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff); 
+       }
+       Serial2.printf("t4.txt=\"%s\"",vfoab);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff); 
+       }
+       Serial2.printf("t10.txt=\"%s\"",modeset);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff); 
+       }
+       Serial2.printf("t1.txt=\"%s\"",mchdata);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("t6.txt=\"%s\"",menu1);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("t7.txt=\"%s\"",menu2);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("t8.txt=\"%s\"",menu3);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("t9.txt=\"%s\"",menu4);
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }  
+              
+       if(meter == "ALC"){
+       Serial2.printf("vis alc,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(meter == "SWR"){
+       Serial2.printf("vis swr,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(meter == "PO "){
+       Serial2.printf("vis po,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }
+
+       if(ts == "10hz"){
+       Serial2.printf("vis p1,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p2,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p3,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis t11,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       
+       }else if(ts == "Khz"){
+       Serial2.printf("vis p1,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p2,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p3,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis t11,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(ts == "Mhz"){
+       Serial2.printf("vis p1,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p2,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p3,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis t11,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(ts == "10Mhz"){
+       Serial2.printf("vis p1,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p2,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis p3,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       Serial2.printf("vis t11,0");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }
+       if(rx_buf[4] == 0x08 || rx_buf[4] == 0x09 || rx_buf[4] == 0x0A || 
+          rx_buf[4] == 0x28 || rx_buf[4] == 0x29 || rx_buf[4] == 0x2A ||
+          rx_buf[4] == 0x48 || rx_buf[4] == 0x49 || rx_buf[4] == 0x4A){
+       Serial2.printf("b8.pco=63488");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(rx_buf[4] != 0x00 || rx_buf[4] != 0x20){
+       Serial2.printf("b8.pco=65535");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       } 
+       }
+
+       if(rx_buf[4] == 0x01 || rx_buf[4] == 0x09 || rx_buf[4] == 0x0A || 
+          rx_buf[4] == 0x21 || rx_buf[4] == 0x29 || rx_buf[4] == 0x41 ||
+          rx_buf[4] == 0x41 || rx_buf[4] == 0x49){
+       Serial2.printf("b14.pco=2016");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else if(rx_buf[4] == 0x02 || rx_buf[4] == 0x0A || rx_buf[4] == 0x22 || 
+                rx_buf[4] == 0x2A || rx_buf[4] == 0x4A || rx_buf[4] == 0x42){
+       Serial2.printf("b14.pco=63488");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       } else if(rx_buf[4] != 0x00 || rx_buf[4] != 0x01 || rx_buf[4] !=0x02){
+       Serial2.printf("b14.pco=65535");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       } 
+       }
+       
+       if(rx_buf[4] == 0x20 || rx_buf[4] == 0x21 || rx_buf[4] == 0x22 ||
+          rx_buf[4] == 0x28 || rx_buf[4] == 0x29 || rx_buf[4] == 0x2A ){
+       Serial2.printf("vis rx,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else {
+        if(rx_buf[4] !=0 || rx_buf[4] != 0x20){
+        Serial2.printf("vis rx,0");
+        for(int i=0; i<3; i++){
+        Serial2.write(0xff);
+        }
+       }
+       }
+       
+       if(rx_buf[4] == 0x40 || rx_buf[4] == 0x41 || rx_buf[4] == 0x42 ||
+          rx_buf[4] == 0x48 || rx_buf[4] == 0x49 || rx_buf[4] == 0x4A ){
+       Serial2.printf("vis tx,1");
+       for(int i=0; i<3; i++){
+       Serial2.write(0xff);
+       }
+       }else {
+        if(rx_buf[4] !=0 || rx_buf[4] != 0x40){
+          Serial2.printf("vis tx,0");
+        for(int i=0; i<3; i++){
+        Serial2.write(0xff);
+        }
+        }
+       }
+        
+       
 }
 
 
@@ -247,17 +441,7 @@ void PanelDecode() {
       case 0x10: modeset = "RTTY"; break;
       case 0x08: modeset = "AM  "; break;
     }
-
-    // LED 설정
-    switch (rx_buf[4]) {
-      case 0x00: led0 = "     "; break;
-      case 0x20: led1 = "RX   "; break;
-      case 0x21: led2 = "P.AMP"; break;
-      case 0x22: led3 = "ATT  "; break;
-      case 0x28: led4 = "RIT  "; break;
-      case 0x30: led5 = "LOCK "; break;
-      case 0x40: led6 = "TX   "; break;
-    }
+   
 
     // 주파수 단위 설정
     switch (rx_buf[17]) {
